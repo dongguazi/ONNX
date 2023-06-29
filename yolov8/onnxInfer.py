@@ -2,7 +2,7 @@ import onnxruntime as rt
 import numpy as np
 import cv2
 import  matplotlib.pyplot as plt
- 
+import time
  
 def nms(pred, conf_thres, iou_thres): 
     conf = pred[..., 4] > conf_thres
@@ -88,7 +88,12 @@ if __name__ == '__main__':
     img = cv2.resize(img, (width, height))
     img = np.transpose(img, (2, 0, 1))
     data = np.expand_dims(img, axis=0) #[1,3,640,640]
+    start=time.time()
     sess = rt.InferenceSession('yolov8s_7.onnx',providers=['CUDAExecutionProvider', 'CPUExecutionProvider'])
+    end=time.time()
+    timerValue=1000*(end-start)
+    print("infer time(ms):{0}",timerValue)
+
     input_name = sess.get_inputs()[0].name
     label_name = sess.get_outputs()[0].name
     pred = sess.run([label_name], {input_name: data.astype(np.float32)})[0] #[1,11,8400]
